@@ -10,11 +10,11 @@ def ElmoEmbedding(x):
 
 
 input_text = layers.Input(shape=(1,), dtype=tf.string)
-embedding = layers.Lambda(ElmoEmbedding, output_shape=(1024,))(input_text)
-lstm = layers.LSTM(100,  kernel_initializer='random_uniform')(embedding)
-dense = layers.Dense(256, activation='relu')(lstm)
-pred = layers.Dense(4, activation='softmax')(dense)
+embedding = layers.Lambda(ElmoEmbedding, output_shape=(None, 1024,))(input_text)
+lstm = layers.LSTM(100, kernel_initializer='random_uniform')(embedding)
+pred = layers.Dense(4, activation='softmax')(lstm)
 
 model = Model(inputs=input_text, outputs=pred)
+model.summary()
 
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
