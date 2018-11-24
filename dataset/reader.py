@@ -1,7 +1,6 @@
-from typing import Iterable
 import pandas as pd
 import env
-
+from preprocessing.ekhprasis import tweet_processor
 
 class DatasetReader:
     def __init__(self, path: str, mode: str):
@@ -10,12 +9,12 @@ class DatasetReader:
         self._path = path
         self._mode = mode
 
-    def read(self) -> Iterable[str]:
+    def read(self):
         data = pd.read_csv(self._path, sep='\t', encoding='utf8', index_col='id')
         for tuple in data.itertuples():
             utterance = env.USER1_SEP_START + tuple.turn1 + env.USER1_SEP_STOP \
-                      + env.USER2_SEP_START + tuple.turn2 + env.USER2_SEP_STOP \
-                      + env.USER1_SEP_START + tuple.turn3 + env.USER1_SEP_STOP
+                     + env.USER2_SEP_START + tuple.turn2 + env.USER2_SEP_STOP \
+                     + env.USER1_SEP_START + tuple.turn3 + env.USER1_SEP_STOP
             if self._mode == 'train':
                 yield (utterance, tuple.label)
             else:
