@@ -1,12 +1,8 @@
-import tweepy
-import csv
 import os
 from twython import Twython
 from twython.exceptions import TwythonError, TwythonRateLimitError
-import pandas as pd
-import env
+from tqdm import tqdm
 import sched, time
-import sys
 
 s = sched.scheduler(time.time, time.sleep)
 ####input your credentials here
@@ -15,15 +11,13 @@ consumer_secret = 's2CJKHryzzT3M778GP3uzYRfI9PBVfFj0hbX8DkGQsNZt33AOH'
 access_token = '2885631262-2885631262-BNa5mGaZbHVvH4u6N9U8i5ixO20uMHeeYzbcuqB'
 access_token_secret = 'JCfbVyZpekgdPeUw95DCPwYbdRkWSsUzMDas5fDPIyE0n'
 
+
 twitter = Twython(
     consumer_key, consumer_secret, oauth_version=2)
 
 ACCESS_TOKEN = twitter.obtain_access_token()
 
 twitter = Twython(consumer_key, access_token=ACCESS_TOKEN)
-
-normals = []
-sarcasms = []
 
 ids_set = set()
 
@@ -32,58 +26,34 @@ if os.path.exists('ids.txt'):
         ids_ = f.readlines()
         for id in ids_:
             if id:
-                ids_set.add(int(id.strip()))
+                ids_set.add(id.strip())
 
 print(len(ids_set))
 
-for __ in range(0, 1000):
-    with open(env.NORMAL_FILE_PATH, 'r') as f:
+
+def download_tweets(file_with_ids, output_file):
+    with open(file_with_ids, 'r') as f:
+        idx = 0
         lines = f.readlines()
-        for line in lines:
-            print(line)
+        while(True):
+            line_ = lines[idx].strip()
+            print(idx)
             try:
-                if line.strip() in ids_set:
+                if line_ in ids_set:
+                    idx += 1
                     print("Omitted")
                     continue
-                status = twitter.show_status(id=line.strip())
-                print(status['text'])
-                normals.append(status['text'])
+                status = twitter.show_status(id=line_)
+                idx += 1
+                with open(output_file, 'a', encoding='utf8') as f:
+                    f.write(line_ + ',' + status['text'].replace('\n', ' ') + '\n')
             except TwythonRateLimitError as rle:
-                print("Waiting 60 sec...")
-                time.sleep(60)
+                time.sleep(10)
             except TwythonError as e:
-                print(str(e))
+                idx += 1
 
             with open('ids.txt', 'a', encoding='utf8') as fid:
-                fid.write(line)
-            if len(normals) % 10 == 0:
-                with open('normals_tweetes.txt', 'a', encoding='utf8') as f:
-                    for normal in normals:
-                        f.write(line.strip() + ',' + normal.replace('\n', ' ') + '\n')
+                fid.write(line_ + '\n')
 
-                normals = []
 
-    with open(env.SARCASM_FILE_PATH, 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            print(line)
-            try:
-                if line.strip() in ids_set:
-                    print("Omitted")
-                    continue
-                status = twitter.show_status(id=line.strip())
-                print(status['text'])
-                sarcasms.append(status['text'])
-            except TwythonRateLimitError as rle:
-                print("Waiting 60 sec...")
-                time.sleep(60)
-            except TwythonError as e:
-                print(str(e))
-
-            with open('ids.txt', 'a', encoding='utf8') as fid:
-                fid.write(line)
-            if len(sarcasms) % 10 == 0:
-                with open('sarcasm_tweetes.txt', 'a', encoding='utf8') as f:
-                    for normal in sarcasms:
-                        f.write(line.strip() + ',' + normal.replace('\n', ' ') + '\n')
-                sarcasms = []
+download_tweets('../resources/dataset/sarcasm/normal.txt', '../resources/dataset/sarcasm/normal_tweets.txt')
