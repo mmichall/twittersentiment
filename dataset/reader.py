@@ -1,8 +1,8 @@
 import pandas as pd
 import env
 import json
-from typing import List
-
+from tqdm import tqdm
+import csv
 
 class DatasetReader:
     def __init__(self, path: str, mode: str):
@@ -24,39 +24,54 @@ class DatasetReader:
 
 
 class SarcasmReader:
-    def __init__(self, comments_paths: List[str], ids_path: str, ids_un_path: str):
-        self._comments_paths = comments_paths
+    def __init__(self, comments_path: str, ids_path: str):
+        self._comments_path = comments_path
         self._ids_path = ids_path
-        self._ids_un_path = ids_path
 
     def read(self):
         comments = {}
-        for comment_path in self._comments_paths:
-            with open(comment_path, 'r', encoding='utf8') as f:
-                print(len(comments))
-                comments.update(json.loads(''.join(f.readlines())))
-        with open(self._ids_path) as fp, open(self._ids_un_path) as ufp:
-            lines = fp.readlines() + ufp.readlines()
+        with open(self._comments_path, 'r', encoding='utf8') as f:
+            comments.update(json.loads(f.readline()))
 
-            for line in lines:
+        with open(self._ids_path) as fp, open('result.csv', 'w', encoding='utf8', newline='') as fres:
+            writer = csv.writer(fres, delimiter='|')
+            lines = fp.readlines()
+
+            for line in tqdm(lines):
+                row = []
+                line = line.strip()
+
                 parts = line.split('|')
                 mains = parts[0].split(' ')
                 responses = parts[1].split(' ')
                 labels = parts[2].split(' ')
 
+                _mains = []
                 for main in mains:
                     if main in comments:
-                        print(comments[main]['text'])
+                        _mains.append(comments[main]['text'])
 
+                topic = ' #main# '.join(_mains)
+
+                _resps = []
+                _ids = []
                 for idx, main in enumerate(responses):
                     if main in comments:
-                        print(comments[main]['text'] + labels[idx] + '\n\n')
+                        _resps.append(comments[main]['text'])
+                        _ids.append(labels[idx])
 
 
+                responses = ' #resp# '.join(_resps)
+                ids = ' '.join(_ids)
 
-# comments.json.002.002
+                row.append(topic)
+                row.append(responses)
+                row.append(ids)
+
+                writer.writerow(row)
+
 
 train_set_reader = DatasetReader(env.TRAIN_FILE_PATH, mode='train')
 dev_set_reader = DatasetReader(env.DEV_FILE_PATH, mode='test')
 
-sarcasm_set_reader = SarcasmReader(env.SARCASM_FILE_PATH, env.SARCASM_IDS_FILE_PATH, env.SARCASM_IDS_UN_FILE_PATH)
+sarcasm_set_reader = SarcasmReader(env.COMMENTS_FILE_PATH, env.IDS_SARC_FILE_PATH)
