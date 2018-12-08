@@ -1,4 +1,5 @@
 from preprocessing.ekhprasis import tweet_processor
+from preprocessing.stopwords import stopwords
 
 
 sentences = [
@@ -15,8 +16,21 @@ sentences = [
 'not mine	done for the day ?	can my meet to sexy girl',
 'I want to play the game	if you just finished the game... then you haven\'t finished the game......	#Emojisong',
 'Iam sory	why sorry ! 😿	I insult you',
-'How much	depends on how long your internet has been out!!!	U have bf'
+'How much	depends on how long your internet has been out!!!	U have bf',
+'Are they told you about that	no they didn\'t. I had no idea. 👎👎	Ok',
+'What should I Do now	pay me for the advice	I missed her',
+'Where in gujrat	Trier - a small German city near the Luxembourg border!	😮',
+'i cant understand	oh sorry sorry. 😢	Mm',
+'Shut up 😂😂😂😂	😂😂😂😂mahn!! You are so intelligent.!! I appreciate.!!!	Y i knw?',
+'I miss u very much	missed you more and going to miss you again<3	I empress u',
+"no it's not soo easy	nice then,hahaha...dnt knw why i\'m doing engineering anyways wabt askin :'(	:/ :( :'("
 ]
 
 for sentence in sentences:
-    print('%s  ->   %s' % (sentence, tweet_processor.pre_process_doc(sentence)))
+    sentence = tweet_processor.pre_process_doc(sentence)
+    sentence = [word.split() for word in sentence]
+    new_sentence = []
+    for row in sentence:
+        new_sentence.extend(row)
+    new_sentence = [word for word in new_sentence if word not in stopwords]
+    print('%s  ->   %s' % (sentence, ' '.join(new_sentence)))

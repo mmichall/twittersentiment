@@ -1,6 +1,6 @@
-from embedding.deepmoji.deepmoji.sentence_tokenizer import SentenceTokenizer
-from embedding.deepmoji.deepmoji.model_def import deepmoji_feature_encoding
-from embedding.deepmoji.deepmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
+from embedding.deepmoji_libs.deepmoji.sentence_tokenizer import SentenceTokenizer
+from embedding.deepmoji_libs.deepmoji.model_def import deepmoji_feature_encoding
+from embedding.deepmoji_libs.deepmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
 
 import json
 

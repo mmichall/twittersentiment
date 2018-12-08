@@ -11,9 +11,9 @@ from __future__ import print_function, division
 import json
 import csv
 import numpy as np
-from embedding.deepmoji.deepmoji.sentence_tokenizer import SentenceTokenizer
-from embedding.deepmoji.deepmoji.model_def import deepmoji_emojis
-from embedding.deepmoji.deepmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
+from embedding.deepmoji_libs.deepmoji.sentence_tokenizer import SentenceTokenizer
+from embedding.deepmoji_libs.deepmoji.model_def import deepmoji_emojis
+from embedding.deepmoji_libs.deepmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
 
 OUTPUT_PATH = 'test_sentences.csv'
 

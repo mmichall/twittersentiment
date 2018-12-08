@@ -1,6 +1,7 @@
 from ekphrasis.classes.preprocessor import TextPreProcessor
-from ekphrasis.classes.tokenizer import SocialTokenizer
-from ekphrasis.dicts.emoticons import emoticons
+from ekphrasis.classes.tokenizer import Tokenizer
+from preprocessing.ekhprasis_libs.dict.emoticons import emoticons
+from preprocessing.ekhprasis_libs.dict.others import others
 
 tweet_processor = TextPreProcessor(
     # omit terms
@@ -25,9 +26,9 @@ tweet_processor = TextPreProcessor(
 
     # select a tokenizer. You can use SocialTokenizer, or pass your own
     # the tokenizer, should take as input a string and return a list of tokens
-    tokenizer=SocialTokenizer(lowercase=True).tokenize,
+    tokenizer=Tokenizer(lowercase=True).tokenize,
 
     # list of dictionaries, for replacing tokens extracted from the text,
     # with other expressions. You can pass more than one dictionaries.
-    dicts=[emoticons]
+    dicts=[others, emoticons]
 )
