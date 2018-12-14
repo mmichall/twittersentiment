@@ -43,7 +43,7 @@ for xx in x:
     XX.append(' '.join(xx + (maxlen - len(xx)) * ['_']))
 x = XX
 
-# DeepMoji embedding
+#DeepMoji embedding
 
 '''if os.path.isfile(env.DEEPMOJI_FEATS_PCK):
   with open(env.DEEPMOJI_FEATS_PCK, 'rb') as df:
