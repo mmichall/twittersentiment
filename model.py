@@ -1,17 +1,17 @@
-from typing import List
-from keras.layers import Input, LSTM, Concatenate
+from typing import List, Union
+from keras.layers import Input, LSTM, Concatenate, RNN
 from keras import Model
 from keras_self_attention import SeqWeightedAttention as Attention
 
 #TODO: add logging results to file (experiment.record())
 
-class RNNModelParams:
-    def __init__(self,
-                 hidden_layers: {},
-                 spatial_dropout: List[float]=None,
-                 recurrent_dropout: List[float]=None,
+class RNNModelParams(object):
+    def __init__(self, layers_size: Union[List[int], int], rnn_cell: RNN,
+                 spatial_dropout: Union[List[float], float]=0., recurrent_dropout: Union[List[float], float]=0.,
                  class_weights: List[int]=None):
-        self.hidden_layers = hidden_layers
+        self.deep_lvl = len(layers_size)
+        self.layers_size = layers_size
+        self.rnn_cell = rnn_cell
         self.dropout = spatial_dropout
         self.recurrent_dropout = recurrent_dropout
         self.class_weights = class_weights

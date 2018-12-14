@@ -1,7 +1,4 @@
-from dataset.reader import DatasetReader
-import env
+from dataset.dataset import SemEvalDataSet
 
-train_set_reader = DatasetReader(env.TRAIN_FILE_PATH, mode='train')
-
-for idx, line in enumerate(train_set_reader.read()):
-    print('Line %d: %s' % (idx, line), end='\n')
+for row in SemEvalDataSet.iterate_train():
+    print(row)
