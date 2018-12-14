@@ -1,66 +1,24 @@
-import os
-from typing import Any
-
-import numpy as np
-from keras import Input
-from keras.layers import Lambda
-
-from bilm import Batcher
-from bilm.elmo_keras import WeightElmo
-from dataset import DataSet
 from feature.base import Feature
-from utils.files import ProjectPath
+from dataset.dataset import DataSet
+from typing import Any
+from keras import Model
+import numpy as np
 
+import tensorflow as tf
+import tensorflow_hub as hub
 
 class ELMoEmbeddingFeature(Feature):
 
-    def __init__(self, name: str, embedding_dir: ProjectPath):
-        self.__name = name
-        self.__embedding_dir: ProjectPath = embedding_dir
-        self.__batcher = self.__create_batcher(embedding_dir)
+    def __init__(self, name):
+        self._name = name
+        self._elmo = hub.Module("https://tfhub.dev/google/elmo/2", trainable=True)
 
-    def input(self):
-        return Input(shape=(None,50),dtype=np.int32,name=self.__name + '_elmo_embedding_input')
+    def model(self, input: Any) -> Model: raise NotImplementedError
 
-    def model(self, input: Any):
-        path_dict = self.__embedding_dir.to_dict()
-        def __lambda_layer(x):
-            import tensorflow as tf
-            from utils.files import ProjectPath
-            from bilm import BidirectionalLanguageModel, all_layers
-            x_input = tf.cast(x, tf.int32)
-            input_dir = ProjectPath.from_dict(path_dict)
-            options_file: str = input_dir.join("options.json").get()
-            weight_file: str = input_dir.join("weights.hdf5").get()
-            with tf.variable_scope('', reuse=tf.AUTO_REUSE):
-                bilm = BidirectionalLanguageModel(options_file, weight_file)
-                embedding_op = bilm(x_input)
-                return all_layers(embedding_op)
-        embeddings = Lambda(__lambda_layer, name=self.__name + '_elmo_lambda_layer')(input)
-        return WeightElmo()(embeddings)
+    def input(self): raise NotImplementedError
 
-    def __create_batcher(self, embedding_dir: ProjectPath) -> Batcher:
-        vocab_path: str = embedding_dir.join("vocabulary.txt").get()
-        return Batcher(vocab_path, 50)
+    def transform(self, dataset: DataSet) -> np.ndarray:
+        yield self._elmo(tf.squeeze(tf.cast(x, tf.string)), signature="default", as_dict=True)["elmo"]
 
     def name(self) -> str:
-        return self.__name
-
-    def transform(self, dataset: DataSet):
-        text = []
-        for sent in dataset.data:
-            sent_text = []
-            for word_idx, word in enumerate(sent):
-                if word_idx >= dataset.sentence_length(): break
-                sent_text.append(word[self.__name])
-            text.append(sent_text)
-        return self.__batcher.batch_sentences(text, padding=dataset.sentence_length())
-
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        del state["_ELMoEmbeddingFeature__batcher"]
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        self.__batcher = self.__create_batcher(self.__embedding_dir)
+        return self._name

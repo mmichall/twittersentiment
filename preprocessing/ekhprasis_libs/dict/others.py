@@ -1,6 +1,7 @@
 others = {"i'm" : "i am",
 "im" : "i am",
 "y" : "you",
+"u": "you",
 "it's" : "its",
 "can't" : "can not",
 "yrs" : "yours",

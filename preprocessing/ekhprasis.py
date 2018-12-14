@@ -2,6 +2,7 @@ from ekphrasis.classes.preprocessor import TextPreProcessor
 from ekphrasis.classes.tokenizer import Tokenizer
 from preprocessing.ekhprasis_libs.dict.emoticons import emoticons
 from preprocessing.ekhprasis_libs.dict.others import others
+from preprocessing.base import Preprocessor
 
 tweet_processor = TextPreProcessor(
     # omit terms
@@ -22,7 +23,7 @@ tweet_processor = TextPreProcessor(
     unpack_hashtags=False,  # perform word segmentation on hashtags
     unpack_contractions=True,  # Unpack contractions (can't -> can not)
     spell_correct_elong=True,  # spell correction for elongated words
-    spell_correction=True, # spell correction
+    spell_correction=True,  # spell correction
 
     # select a tokenizer. You can use SocialTokenizer, or pass your own
     # the tokenizer, should take as input a string and return a list of tokens
@@ -32,3 +33,8 @@ tweet_processor = TextPreProcessor(
     # with other expressions. You can pass more than one dictionaries.
     dicts=[others, emoticons]
 )
+
+class EkhprasisPreprocessor(Preprocessor):
+
+    def preprocess(self, sentence) -> str:
+        return ' '.join(tweet_processor.pre_process_doc(sentence))
