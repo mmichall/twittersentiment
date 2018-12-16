@@ -1,5 +1,5 @@
-from preprocessing.ekhprasis import tweet_processor
-from preprocessing.stopwords import stopwords
+from preprocessor.ekhprasis import tweet_processor
+from preprocessor.stopwords import stopwords
 
 
 sentences = [

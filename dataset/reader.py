@@ -1,6 +1,10 @@
 from typing import List, Iterator, Union, Tuple
 import pandas as pd
-from preprocessing.base import Preprocessor
+from preprocessor.base import Preprocessor
+from tqdm import tqdm
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 class CSVReader:
 
@@ -13,9 +17,12 @@ class CSVReader:
         cols = sents_cols + [label_col]
         data = pd.read_csv(self._data_path, sep=sep, usecols=cols, index_col=index_col, header=0, encoding='utf8')
         if self._preprocessor:
+            tqdm.pandas()
+            logging.info('Preprocessing...')
             data[sents_cols] = data[sents_cols].applymap(lambda x: self._preprocessor.preprocess(x))
         if merge_with:
             data = data.reindex(columns=cols)
             data['sentence'] = data[sents_cols].apply(lambda x: merge_with.join(x), axis=1)
             data = data[['sentence', 'label']]
         return data
+

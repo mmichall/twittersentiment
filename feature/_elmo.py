@@ -19,7 +19,7 @@ class ELMoEmbeddingFeature(Feature):
         self.__embedding_dir: ProjectPath = embedding_dir
         self.__batcher = self.__create_batcher(embedding_dir)
 
-    def input(self):
+    def input_layer(self):
         return Input(shape=(None,50),dtype=np.int32,name=self.__name + '_elmo_embedding_input')
 
     def model(self, input: Any):

@@ -15,7 +15,7 @@ class ELMoEmbeddingFeature(Feature):
 
     def model(self, input: Any) -> Model: raise NotImplementedError
 
-    def input(self): raise NotImplementedError
+    def input_layer(self): raise NotImplementedError
 
     def transform(self, dataset: DataSet) -> np.ndarray:
         yield self._elmo(tf.squeeze(tf.cast(x, tf.string)), signature="default", as_dict=True)["elmo"]

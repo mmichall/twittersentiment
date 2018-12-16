@@ -12,7 +12,7 @@ SemEvalDataSet = FixedSplitDataSet(
     test_dataset=CSVReader(env.DEV_FILE_PATH, preprocessor=ekhprasis_preprocessor).read(
         sents_cols=['turn1', 'turn2', 'turn3'], label_col="label", merge_with=' <eou> '))
 
+glove_100 = GensimPretrainedFeature(dataset=SemEvalDataSet, gensim_pretrained_embedding='glove-twitter-100', embedding_vector_length=100)
 
-simple_feature = GensimPretrainedFeature("SimpleFeature")
-features = simple_feature.transform(SemEvalDataSet, )
-
+for embedding in glove_100.transform(max_len=100):
+    print(embedding)

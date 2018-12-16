@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
-from preprocessing.ekhprasis import EkhprasisPreprocessor
+from preprocessor.base import Preprocessor
 
 from dataset.reader import CSVReader
 import env
@@ -20,8 +20,7 @@ class DataSet(ABC):
 
     def __init__(self, name: str = None):
         self.name = name
-        self._len = None
-        self._max_len = None
+        self.size = None
 
 
 class FixedSplitDataSet(DataSet):
@@ -30,7 +29,7 @@ class FixedSplitDataSet(DataSet):
         super().__init__(name)
         self._dataset = pd.concat([train_dataset, test_dataset], ignore_index=True)
         self.split_idx = len(train_dataset)
-        self._len = self._dataset.size
+        self.size = self._dataset.size
 
     def iterate(self) -> np.ndarray:
         for row in self._dataset.itertuples():
@@ -41,15 +40,8 @@ class FixedSplitDataSet(DataSet):
             yield row
 
     def iterate_test(self) -> np.ndarray:
-        for row in self._dataset.loc[self.split_idx:self._len].itertuples():
+        for row in self._dataset.loc[self.split_idx:self.size].itertuples():
             yield row
 
     def len_(self):
         return
-
-
-SemEvalDataSet = FixedSplitDataSet(
-    train_dataset=CSVReader(env.TRAIN_FILE_PATH, preprocessor=EkhprasisPreprocessor()).read(
-        sents_cols=['turn1', 'turn2', 'turn3'], label_col="label", merge_with=' <eou> '),
-    test_dataset=CSVReader(env.DEV_FILE_PATH, preprocessor=EkhprasisPreprocessor()).read(
-        sents_cols=['turn1', 'turn2', 'turn3'], label_col="label", merge_with=' <eou> '))
