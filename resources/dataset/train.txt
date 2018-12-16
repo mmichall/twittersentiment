@@ -280,7 +280,7 @@ id	turn1	turn2	turn3	label
 278	Yep ... Now the whole world  knows ..	wow, i cannot believe this	Know we can think for our future together.	others
 279	no i  am not	Oh my bad. Carry on.	sex?	others
 280	Oh ok i will	thank you man 8)	Its ok	others
-281	i am frustrated asf	I understand your pain S.	:(	sad 
+281	i am frustrated asf	I understand your pain S.	:(	sad
 282	??	what what? Haha 😆	Is it good to sacrifice for our friends	others
 283	But u made me more sad	Sorry bro :(	Not expected from u	sad
 284	U r just	I'm the best	😢😢😕	sad

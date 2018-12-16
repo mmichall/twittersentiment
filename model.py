@@ -4,12 +4,13 @@ from keras.models import Model
 from keras_self_attention import SeqWeightedAttention as Attention
 from feature.base import Feature
 
-#TODO: add logging results to file (experiment.record())
+
+# TODO: add logging results to file (experiment.record())
 
 class RNNModelParams(object):
     def __init__(self, layers_size: Union[List[int], int], rnn_cell: RNN = LSTM,
-                 spatial_dropout: Union[List[float], float]=0., recurrent_dropout: Union[List[float], float]=0.,
-                 dense_encoder_size: int = None, class_weights: List[int]=None, bidirectional:bool = True):
+                 spatial_dropout: Union[List[float], float] = 0., recurrent_dropout: Union[List[float], float] = 0.,
+                 dense_encoder_size: int = None, class_weights: List[int] = None, bidirectional: bool = True):
         self.deep_lvl = len(layers_size)
         self.layers_size = layers_size
         self.rnn_cell = rnn_cell
@@ -21,20 +22,20 @@ class RNNModelParams(object):
 
 
 class RNNModel:
-    def __init__(self, features: Union[List[Feature], Feature], output: Dense,
-                 params: RNNModelParams, attention: bool=True):
+    def __init__(self, inputs: Union[List[Input]], features: Union[List[Feature], Feature], output: Dense,
+                 params: RNNModelParams, attention: bool = True):
 
+        self._inputs = inputs
         self._features = features
         self._output = output
         self._attention = attention
         self._params = params
 
     def build(self):
-        _inputs = [feature.input_layer() for feature in self._features]
-        _embedding = [feature.embedding_layer()(_inputs[idx]) for idx, feature in enumerate(self._features)]
+        _embedding = [feature.embedding_layer() for idx, feature in enumerate(self._features)]
 
         if len(_embedding) > 1:
-            _layer = Concatenate(_embedding)
+            _layer = Concatenate()(_embedding)
         else:
             _layer = _embedding[0]
 
@@ -57,11 +58,15 @@ class RNNModel:
 
         output = self._output(_layer)
 
-        self.__model = Model(inputs=_inputs, outputs=output)
+        self.__model = Model(inputs=self._inputs, outputs=output)
 
     def compile(self):
         self.__model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
         self.__model.summary()
 
+    def fit(self, x=None, y=None, batch_size=None, epochs=1, verbose=1, callbacks=None, validation_split=0.,
+            validation_data=None, shuffle=True, class_weight=None, sample_weight=None, initial_epoch=0,
+            steps_per_epoch=None, validation_steps=None, **kwargs):
 
-
+        self.__model.fit(x, y, batch_size, epochs, verbose, callbacks, validation_split, validation_data, shuffle,
+                         class_weight, sample_weight, initial_epoch, steps_per_epoch, validation_steps, **kwargs)

@@ -1,36 +1,42 @@
 from abc import abstractmethod
-from typing import Union, List
+from typing import Union, List, Dict
 from keras import Input
 from keras.layers import Embedding, Lambda
 import numpy as np
 import pandas as pd
 import unittest
+
+from tqdm import tqdm
+
 import env
-
+import logging
 from dataset.dataset import DataSet
-from feature.base import Feature
+from feature.base import OneHotFeature
+
+logging.basicConfig(level=logging.INFO)
 
 
-class WordFeature(Feature):
+class WordFeature(OneHotFeature):
 
-    def __init__(self, dataset: DataSet, name: str, embedding_vector_length: int):
-        super().__init__(dataset, name=name)
+    def __init__(self, name: str, word2index:Dict, embedding_vector_length: int, max_len: int, input:Input):
+        super().__init__(name=name, word2index=word2index, max_len=max_len, input=input)
         self._embedding_vector_length = embedding_vector_length
         self._casing_alphabet = ["numeric", "mostly_numeric", "contains_digit", "other"]
+        self._word_embedding = np.zeros((len(self._word2index) + 1, self._embedding_vector_length))
         with open(env.OFFENSIVE_WORDS_FILE_PATH) as of:
             self.offensive_words = set([word.lower().strip() for word in of.readlines()])
         with open(env.CONTROVERSIAL_WORDS_FILE_PATH) as of:
             self.controversial_words = set([word.lower().strip() for word in of.readlines()])
-
-    def input_layer(self) -> Input:
-        return Input(shape=(self._glove_vector_length,), name=self._name)
+        self.create_weight_matrix()
 
     def embedding_layer(self, trainable: bool = False) -> Union[Embedding, Lambda]:
-        return Embedding(input_dim=len(self.word_2_index) + 1, output_dim=self._glove_vector_length,
-                         weights=[self._word_embedding], trainable=trainable)
+        return Embedding(input_dim=self._word_embedding.shape[0], output_dim=self._word_embedding.shape[1],
+                         weights=[self._word_embedding], trainable=trainable, mask_zero=True)(self._input)
 
-    def transform(self, **kwargs) -> np.ndarray:
-        return super().transform(func=lambda x: self.convert_to_vector(x))
+    def create_weight_matrix(self):
+        logging.info('Creating {} embedding dictionary.'.format(self.name()))
+        for word, idx in tqdm(self._word2index.items()):
+            self._word_embedding[idx] = self.convert_to_vector(word)
 
     def convert_to_vector(self, word: str) -> np.ndarray:
         special_chars = [1 if '!' in word else 0,
