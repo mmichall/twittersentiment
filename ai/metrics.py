@@ -1,8 +1,47 @@
 from keras.utils import to_categorical
 import numpy as np
+import keras.backend as K
+import numpy as np
+from keras.callbacks import ModelCheckpoint
+from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 
 label2emotion = {0: "others", 1: "happy", 2: "sad", 3: "angry"}
 emotion2label = {"others": 0, "happy": 1, "sad": 2, "angry": 3}
+
+
+class MicroF1(ModelCheckpoint):
+    def on_train_begin(self, logs={}):
+        super(MicroF1, self).__init__()
+        self.val_f1s = []
+        self.val_recalls = []
+        self.val_precisions = []
+
+    def on_epoch_end(self, epoch, logs={}):
+        val_predict = (np.asarray(self.model.predict(self.validation_data[0])))
+        val_targ = self.validation_data[1]
+
+        discretePredictions = to_categorical(val_predict.argmax(axis=1), num_classes=4)
+
+        truePositives = np.sum(discretePredictions * val_targ, axis=0)
+        falsePositives = np.sum(np.clip(discretePredictions - val_targ, 0, 1), axis=0)
+        falseNegatives = np.sum(np.clip(val_targ - discretePredictions, 0, 1), axis=0)
+
+        truePositives = truePositives[1:].sum()
+        falsePositives = falsePositives[1:].sum()
+        falseNegatives = falseNegatives[1:].sum()
+
+        microPrecision = truePositives / (truePositives + falsePositives)
+        microRecall = truePositives / (truePositives + falseNegatives)
+
+        # microF1 = (2 * microRecall * microPrecision) / (microPrecision + microRecall) if (microPrecision + microRecall) > 0 else 0
+        microF1 = 2 / (1.0 / microPrecision + 1.0 / microRecall)
+
+        print("- microF1: %f - true_positives: %d - false_positives %d - false_negatives: %d" % (
+        microF1, int(truePositives), int(falsePositives), int(falseNegatives)))
+
+        super(self).on_epoch_end(epoch, logs)
+        return
+
 
 def getMetrics(predictions, ground):
     """Given predicted labels and the respective ground truth labels, display some metrics
@@ -57,7 +96,7 @@ def getMetrics(predictions, ground):
     microRecall = truePositives / (truePositives + falseNegatives)
 
     microF1 = (2 * microRecall * microPrecision) / (microPrecision + microRecall) if (
-                                                                                     microPrecision + microRecall) > 0 else 0
+                                                                                         microPrecision + microRecall) > 0 else 0
     # -----------------------------------------------------
 
     predictions = predictions.argmax(axis=1)
