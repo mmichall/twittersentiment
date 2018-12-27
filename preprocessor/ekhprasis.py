@@ -1,6 +1,6 @@
 from ekphrasis.classes.preprocessor import TextPreProcessor
 from ekphrasis.classes.tokenizer import Tokenizer
-from preprocessor.ekhprasis_libs.dict.emoticons import emoticons
+from preprocessor.ekhprasis_libs.dict.emoticons_original import emoticons_original
 from preprocessor.ekhprasis_libs.dict.others import others
 from preprocessor.base import Preprocessor
 import logging
@@ -17,7 +17,7 @@ class EkhprasisPreprocessor(Preprocessor):
                  dicts=None):
         super().__init__(name="EkhprasisPreprocessor", verbose=verbose)
         if dicts is None:
-            dicts = [others, emoticons]
+            dicts = [others, emoticons_original]
         if normalize is None:
             normalize = ['number']
         if omit is None:

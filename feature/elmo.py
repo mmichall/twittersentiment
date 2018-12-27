@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from keras.layers import Embedding, Lambda
+from keras.layers import Embedding, Lambda, Layer
 
 from feature.base import Feature
 from dataset.dataset import DataSet
@@ -8,23 +8,47 @@ from typing import Any, Union
 from keras import Model, Input
 import numpy as np
 
+import keras.backend as K
 import tensorflow as tf
 import tensorflow_hub as hub
 
+
 class ELMoEmbeddingFeature(Feature):
 
-    def __init__(self, name):
-        self._name = name
-        self._elmo = hub.Module("https://tfhub.dev/google/elmo/2", trainable=True)
+    def __init__(self, name: str, max_len: int, input: Input):
+        super().__init__(name=name, max_len=max_len, input=input)
+        # self._elmo = hub.Module("https://tfhub.dev/google/elmo/2", trainable=True)
 
-    @abstractmethod
-    def input_layer(self) -> Input: raise NotImplementedError
+    def embedding_layer(self, trainable=False) -> Union[Embedding, Lambda, Layer]:
+        return ElmoEmbeddingLayer()(self._input)
 
-    @abstractmethod
-    def embedding_layer(self, trainable=False) -> Union[Embedding, Lambda]: raise NotImplementedError
+    def input_layer(self) -> Input:
+        pass
 
-    def transform(self, dataset: DataSet) -> np.ndarray:
-        yield self._elmo(tf.squeeze(tf.cast(x, tf.string)), signature="default", as_dict=True)["elmo"]
 
-    def name(self) -> str:
-        return self._name
+class ElmoEmbeddingLayer(Layer):
+    def __init__(self, **kwargs):
+        self.dimensions = 1024
+        self.trainable = True
+        super(ElmoEmbeddingLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        self.elmo = hub.Module('https://tfhub.dev/google/elmo/2', trainable=self.trainable,
+                               name="{}_module".format(self.name))
+        self.trainable_weights += K.tf.trainable_variables(scope="^{}_module/.*".format(self.name))
+        super(ElmoEmbeddingLayer, self).build(input_shape)
+
+    def call(self, x, mask=None):
+        result = self.elmo(tf.squeeze(tf.cast(x, tf.string)),
+                           as_dict=True,
+                           signature='default')['elmo']
+        return result
+
+    def compute_mask(self, inputs, mask=None):
+        return K.not_equal(inputs, 161 * ['_<PAD>_'])
+
+    def compute_output_shape(self, input_shape):
+        return None, 3, 161, self.dimensions
+
+
+

@@ -9,7 +9,7 @@ import tensorflow as tf
 from dataset.dataset import FixedSplitDataSet, SimpleDataSet
 from dataset.reader import CSVReader
 from feature.base import Feature
-from model import RNNModel, RNNModelParams
+from model import HANModel, RNNModelParams
 from keras import Input
 from keras.callbacks import ModelCheckpoint
 from keras.layers import LSTM, GRU
@@ -62,26 +62,26 @@ sem_eval_dataset_dev = SimpleDataSet(dataset=CSVReader(env.DEV_FILE_PATH,
 sem_eval_dataset_dev.word2index = sem_eval_dataset.word2index
 
 input = Input(shape=(MAX_LEN,), name='one_hot_input')
-text_input = Input(shape=(1,), dtype=tf.string, name='text_input')
+text_input = Input(shape=(3,), dtype=tf.string, name='text_input')
 # TODO: encapsulate embedding_vector_length argument
 manual_features = WordFeature(name='word_feature', input=input,
                               word2index=sem_eval_dataset.word2index,
                               embedding_vector_length=8, max_len=MAX_LEN)
 
 # TODO: add trainable
-glove_features = GensimPretrainedFeature(word2index=sem_eval_dataset.word2index, input=input,
-                                         gensim_pretrained_embedding=env.W2V_310_FILE_PATH,
-                                         embedding_vector_length=310, max_len=MAX_LEN)
+#glove_features = GensimPretrainedFeature(word2index=sem_eval_dataset.word2index, input=input,
+#                                         gensim_pretrained_embedding=env.W2V_310_FILE_PATH,
+#                                         embedding_vector_length=310, max_len=MAX_LEN)
 
 elmo_features = ELMoEmbeddingFeature(name='ELMo_Embedding', max_len=MAX_LEN, input=text_input)
 
-features: List[Feature] = [manual_features, glove_features, elmo_features]
+features: List[Feature] = [elmo_features]
 
 params = RNNModelParams(layers_size=LAYERS_SIZE, spatial_dropout=SPATIAL_DROPOUT, recurrent_dropout=RECURRENT_DROPOUT,
                         dropout_dense=DROPOUT_DENSE,
                         dense_encoder_size=DENSE)
 
-model = RNNModel(inputs=[input, text_input], features=features, output=Dense(3, activation='softmax', name="output"),
+model = HANModel(inputs=text_input, features=features, output=Dense(3, activation='softmax', name="output"),
                  params=params,
                  attention=ATTENTION)
 
@@ -89,18 +89,32 @@ model.build()
 model.compile()
 
 X = [value for value in tqdm(sem_eval_dataset.iterate_train_x(max_len=MAX_LEN, one_hot=True))]
-X_text = [value for value in tqdm(sem_eval_dataset.iterate_train_x(max_len=MAX_LEN, one_hot=False))]
+X_text = []
+for value in tqdm(sem_eval_dataset.iterate_train_x(max_len=MAX_LEN, one_hot=False)):
+    splitted = value.split(' <eou> ')
+    for s_ in splitted:
+        s_ = s_ + ['_<PAD>_'] * (161 - len(s_))
+        X_text.append(s_)
 
 X_val = [value for value in tqdm(sem_eval_dataset_dev.iterate_x(max_len=MAX_LEN, one_hot=True))]
-X_val_text = [value for value in tqdm(sem_eval_dataset_dev.iterate_x(max_len=MAX_LEN, one_hot=False))]
+X_val_text = []
+for value in tqdm(sem_eval_dataset_dev.iterate_x(max_len=MAX_LEN, one_hot=False)):
+    splitted = value.split(' <eou> ')
+    for s_ in splitted:
+        s_ = s_ + ['_<PAD>_'] * (161 - len(s_))
+        X_val_text.append(s_)
 
 Y_val = [y for y in tqdm(sem_eval_dataset_dev.iterate_y(one_hot=True))]
 Y = [y for y in sem_eval_dataset.iterate_train_y(one_hot=True)]
 
-val_data = ({'one_hot_input': np.array(X_val),
-             'text_input': np.array(X_val_text)},
-            {'output': np.array(Y_val)}
-            )
+# val_data = ({'one_hot_input': np.array(X_val),
+#              'text_input': np.array(X_val_text)},
+#             {'output': np.array(Y_val)}
+#             )
+val_data = ({'text_input': np.array(X_val_text)},
+             {'output': np.array(Y_val)}
+             )
+
 
 filepath = "_{}_{}_{}_{}_{}_{}_".format(
     'LSTM' if RNN_TYPE == LSTM else 'GRU',
@@ -113,7 +127,8 @@ filepath = "/data/spc_{epoch:02d}_F1_{f1_micro_score:.4f}_catAcc_{val_categorica
 
 # model.model().predict((([np.array(X_val), np.array(X_val_text)], np.array(Y_val))[0]), batch_size=BATCH_SIZE)
 
-model.fit(x=[np.array(X), np.array(X_text)],
+
+model.fit(x=np.array(X_text),
           y=np.array(Y),
           validation_data=val_data,
           batch_size=BATCH_SIZE,

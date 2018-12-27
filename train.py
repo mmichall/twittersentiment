@@ -6,7 +6,7 @@ import env
 from dataset.reader import train_set_reader, dev_set_reader
 from preprocessor.ekhprasis_libs import tweet_processor
 from ai.model import lstm
-from ai.metrics import getMetrics
+from metrics import getMetrics
 
 from embedding.deepmoji import embed
 
