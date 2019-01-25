@@ -64,9 +64,9 @@ sem_eval_dataset_dev.word2index = sem_eval_dataset.word2index
 input = Input(shape=(MAX_LEN,), name='one_hot_input')
 text_input = Input(shape=(1,), dtype=tf.string, name='text_input')
 # TODO: encapsulate embedding_vector_length argument
-ext_features = WordFeature(name='word_feature', input=input,
+manual_features = WordFeature(name='word_feature', input=input,
                               word2index=sem_eval_dataset.word2index,
-                              embedding_vector_length=6, max_len=MAX_LEN)
+                              embedding_vector_length=8, max_len=MAX_LEN)
 
 # TODO: add trainable
 glove_features = GensimPretrainedFeature(word2index=sem_eval_dataset.word2index, input=input,
@@ -75,15 +75,15 @@ glove_features = GensimPretrainedFeature(word2index=sem_eval_dataset.word2index,
 
 elmo_features = ELMoEmbeddingFeature(name='ELMo_Embedding', max_len=MAX_LEN, input=text_input)
 
-features: List[Feature] = [glove_features, elmo_features]
-ext_features = [ext_features]
+features: List[Feature] = [manual_features, glove_features, elmo_features]
 
 params = RNNModelParams(layers_size=LAYERS_SIZE, spatial_dropout=SPATIAL_DROPOUT, recurrent_dropout=RECURRENT_DROPOUT,
                         dropout_dense=DROPOUT_DENSE,
                         dense_encoder_size=DENSE)
 
-model = RNNModel(inputs=[input, text_input], features=features, features_to_dense=ext_features,
-                 output=Dense(3, activation='softmax', name="output"), params=params, attention=ATTENTION)
+model = RNNModel(inputs=[input, text_input], features=features, output=Dense(3, activation='softmax', name="output"),
+                 params=params,
+                 attention=ATTENTION)
 
 model.build()
 model.compile()
@@ -111,6 +111,7 @@ filepath = "_{}_{}_{}_{}_{}_{}_".format(
     str() if DROPOUT_DENSE else '')
 filepath = "/data/spc_{epoch:02d}_F1_{f1_micro_score:.4f}_catAcc_{val_categorical_accuracy:.4f}_trainable" + filepath + ".hdf5"
 
+# model.model().predict((([np.array(X_val), np.array(X_val_text)], np.array(Y_val))[0]), batch_size=BATCH_SIZE)
 
 model.fit(x=[np.array(X), np.array(X_text)],
           y=np.array(Y),

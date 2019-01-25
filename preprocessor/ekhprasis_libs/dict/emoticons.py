@@ -169,10 +169,10 @@ emoticons = {
     '}😃': '>:-)',
     '3:-)': '>:-)',
     '3😃': '>:-)',
-    'o/\o': '<highfive>',
-    '^5': '<highfive>',
-    '>_>^': '<highfive>',
-    '^<_<': '<highfive>',  # todo:fix tokenizer - MISSES THIS
+    'o/\o': '<_highfive>',
+    '^5': 'emotionhighfive>',
+    '>_>^': 'emotionhighfive>',
+    '^<_<': 'emotionhighfive>',  # todo:fix tokenizer - MISSES THIS
     '<3': '❤',
     '😿': '😢',
     '😹': '😂',

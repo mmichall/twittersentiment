@@ -1,6 +1,7 @@
 from ekphrasis.classes.preprocessor import TextPreProcessor
 from ekphrasis.classes.tokenizer import Tokenizer
 from preprocessor.ekhprasis_libs.dict.emoticons_original import emoticons_original
+#from preprocessor.ekhprasis_libs.dict.emoticons_2 import emoticons_original
 from preprocessor.ekhprasis_libs.dict.others import others
 from preprocessor.base import Preprocessor
 import logging
@@ -55,3 +56,9 @@ class EkhprasisPreprocessor(Preprocessor):
 
     def _preprocess(self, sentence) -> str:
         return ' '.join(' '.join(self.tweet_processor.pre_process_doc(sentence)).split())
+
+
+class SimplePreprocessor(Preprocessor):
+
+    def _preprocess(self, sentence) -> str:
+        return sentence

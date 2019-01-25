@@ -6,7 +6,9 @@ from keras.layers import Lambda, Embedding
 from tqdm import tqdm
 import logging
 import numpy as np
+import os
 import gensim.downloader as api
+from gensim.models import KeyedVectors
 
 logging.basicConfig(level=logging.INFO)
 
@@ -22,11 +24,14 @@ class GensimPretrainedFeature(OneHotFeature):
 
     def embedding_layer(self, trainable=False) -> Union[Embedding, Lambda]:
         return Embedding(input_dim=self._word_embedding.shape[0], output_dim=self._word_embedding.shape[1],
-                         weights=[self._word_embedding], trainable=trainable, mask_zero=True)(self._input)
+                         weights=[self._word_embedding], trainable=False, mask_zero=True)(self._input)
 
     def load_gensim_model(self):
         logging.info('Gensim {} is loading.'.format(self._gensim_pretrained_glove))
-        self._gensim_embedding_model = api.load(self._gensim_pretrained_glove)
+        if os.path.isfile(self._gensim_pretrained_glove):
+          self._gensim_embedding_model = KeyedVectors.load_word2vec_format (self._gensim_pretrained_glove, binary=False)
+        else:
+          self._gensim_embedding_model = api.load(self._gensim_pretrained_glove)
         logging.info('Creating {} embedding dictionary.'.format(self._gensim_pretrained_glove))
         for word, idx in tqdm(self._word2index.items()):
             if word in self._gensim_embedding_model.wv:

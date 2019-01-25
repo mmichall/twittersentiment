@@ -30,7 +30,7 @@ class SimpleDataSet(DataSet):
         self.max_len = -1
         self._class_limit = None
         self._tokenizer: Tokenizer = Tokenizer(char_level=False, filters='')
-        self._tokenizer.fit_on_texts([row for row in self.iterate()])
+        self._tokenizer.fit_on_texts([row for row in self.iterate_x()])
         self.word2index = self._tokenizer.word_index
         if self._labels_map:
             self._labels = list(set(self._labels_map.values()))
@@ -67,9 +67,10 @@ class SimpleDataSet(DataSet):
             class_counter = {}
         for idx, row in enumerate(dataset.itertuples()):
             sentence = row.sentence
-            label = row.label
-            if self._skipped_labels and label in self._skipped_labels:
-                continue
+            if len(row) > 2:
+                label = row.label
+                if self._skipped_labels and label in self._skipped_labels:
+                    continue
             if one_hot:
                 if max_len:
                     one_hot_array = [0] * max_len

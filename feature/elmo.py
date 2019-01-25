@@ -45,10 +45,10 @@ class ElmoEmbeddingLayer(Layer):
         return result
 
     def compute_mask(self, inputs, mask=None):
-        return K.not_equal(inputs, 161 * ['_<PAD>_'])
+        return K.not_equal(inputs, 50 * ['_<PAD>_'])
 
     def compute_output_shape(self, input_shape):
-        return None, 3, 161, self.dimensions
+        return None, 50, self.dimensions
 
 
 

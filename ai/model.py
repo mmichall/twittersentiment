@@ -36,3 +36,4 @@ def lstm(seq_len: int):
     model.summary()
 
     return model
+

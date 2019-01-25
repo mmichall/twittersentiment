@@ -1,22 +1,18 @@
 import env
 from dataset.dataset import FixedSplitDataSet
 from dataset.reader import CSVReader
-from preprocessor.ekhprasis import EkhprasisPreprocessor
+from preprocessor.ekhprasis import EkhprasisPreprocessor, SimplePreprocessor
 from keras.preprocessing.text import Tokenizer
+import pandas as pd
 
-ekhprasis_preprocessor = EkhprasisPreprocessor(verbose=1)
+ekhprasis_preprocessor = SimplePreprocessor(verbose=1)
 
-SemEvalDataSet = FixedSplitDataSet(
-    train_dataset=CSVReader(env.TRAIN_FILE_PATH, preprocessor=ekhprasis_preprocessor).read(
-        sents_cols=['turn1', 'turn2', 'turn3'], label_col="label", merge_with=' <eou> '),
-    test_dataset=CSVReader(env.DEV_FILE_PATH, preprocessor=ekhprasis_preprocessor).read(
-        sents_cols=['turn1', 'turn2', 'turn3'], label_col="label", merge_with=' <eou> '))
+# SemEvalDataSet = FixedSplitDataSet(
+#     train_dataset=CSVReader(env.TRAIN_FILE_PATH_BL, preprocessor=ekhprasis_preprocessor).read(
+#         sents_cols=None, label_col=None, merge_with=' <eou> '),
+#     test_dataset=CSVReader(env.TRAIN_FILE_PATH_BL, preprocessor=ekhprasis_preprocessor).read(
+#         sents_cols=None, label_col=None, merge_with=' <eou> '))
 
-tokenizer = Tokenizer(oov_token='0', char_level=False, filters='')
-
-lists = [row.sentence.split(' ') for row in SemEvalDataSet.iterate()]
-tokenizer.fit_on_texts(lists)
-
-for row in SemEvalDataSet.iterate():
-    print(row.sentence)
-    print(tokenizer.texts_to_sequences(row.sentence.split(' ')))
+count = 0
+data = pd.read_csv(env.TRAIN_FILE_PATH_BL, skip_blank_lines=False, header=None)
+print(len(data))

@@ -29,7 +29,7 @@ class Feature(ABC):
 
 class OneHotFeature(Feature):
 
-    def __init__(self, name: str, max_len: int, word2index: Dict, input: Input):
+    def __init__(self, name: str, max_len: int, input: Input, word2index: Dict = None):
         super().__init__(name, max_len, input=input)
         self._word2index = word2index
 

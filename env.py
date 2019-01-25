@@ -2,19 +2,40 @@ import os.path
 
 GLOVE_PATH = '../resources/glove'
 DATASET_PATH = '../resources/dataset'
+EMBEDDING_PATH = '../resources/embedding'
 EXTERNAL_DIR_PATH = '../resources/external'
 DEEPMOJI_WEIGHTS = '../resources/deepmoji_weights.hdf5'
 DEEPMOJI_VOCAB = '../resources/vocabulary.json'
 
 TRAIN_FILE_NAME = 'train.txt'
+TRAIN_FILE_CLEANED_NAME = 'train_cleaned.txt'
 DEV_FILE_NAME = 'dev.txt'
+TEST_FILE_NAME = 'test.txt'
+TRAIN_FILE_NAME_ = 'train_.csv'
+TRAIN_FILE_NAME_BL = 'train_bl.csv'
+DEV_FILE_NAME_ = 'dev_.csv'
+DEV_FILE_NAME_BL = 'dev_bl.csv'
+TRAIN_TAGS_FILE_NAME_ = 'train_tags.txt'
+DEV_TAGS_FILE_NAME_ = 'dev_tags.txt'
 GLOVE_FILE_NAME = 'glove.twitter.27B.25.txt'
+W2V_310_FILE_NAME = 'ntua_twitter_affect_310.txt'
 OFFENSIVE_WORDS_FILE_NAME = 'offensive_words'
 CONTROVERSIAL_WORDS_FILE_NAME = 'controversial_words'
+NEGATION_WORDS_FILE_NAME = 'negation_words'
 
 TRAIN_FILE_PATH = os.path.join(DATASET_PATH, TRAIN_FILE_NAME)
+TRAIN_FILE_CLEANED_PATH = os.path.join(DATASET_PATH, TRAIN_FILE_CLEANED_NAME)
 DEV_FILE_PATH = os.path.join(DATASET_PATH, DEV_FILE_NAME)
+TEST_FILE_PATH = os.path.join(DATASET_PATH, TEST_FILE_NAME)
+TRAIN_FILE_PATH_ = os.path.join(DATASET_PATH, TRAIN_FILE_NAME_)
+TRAIN_FILE_PATH_BL = os.path.join(DATASET_PATH, TRAIN_FILE_NAME_BL)
+DEV_FILE_PATH_ = os.path.join(DATASET_PATH, DEV_FILE_NAME_)
+DEV_FILE_PATH_BL = os.path.join(DATASET_PATH, DEV_FILE_NAME_BL)
+TRAIN_TAGS_FILE_NAME_ = os.path.join(DATASET_PATH, TRAIN_TAGS_FILE_NAME_)
+DEV_TAGS_FILE_PATH_ = os.path.join(DATASET_PATH, DEV_TAGS_FILE_NAME_)
 GLOVE_FILE_PATH = os.path.join(GLOVE_PATH, GLOVE_FILE_NAME)
+W2V_310_FILE_PATH = os.path.join(EMBEDDING_PATH, W2V_310_FILE_NAME)
+NEGATION_WORDS_FILE_PATH = os.path.join(EXTERNAL_DIR_PATH, CONTROVERSIAL_WORDS_FILE_NAME)
 OFFENSIVE_WORDS_FILE_PATH = os.path.join(EXTERNAL_DIR_PATH, OFFENSIVE_WORDS_FILE_NAME)
 CONTROVERSIAL_WORDS_FILE_PATH = os.path.join(EXTERNAL_DIR_PATH, CONTROVERSIAL_WORDS_FILE_NAME)
 
